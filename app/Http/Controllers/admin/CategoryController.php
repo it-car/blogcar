@@ -29,6 +29,7 @@ class CategoryController extends CommController
 
         // $category = Category::tree();
         $category = (new Category)->tree();
+        // dd($category);
         return view('admin.category.index')->with('data',$category);
     }
 
@@ -89,7 +90,8 @@ class CategoryController extends CommController
     public function create()
     {
         //从数据库中找到cate_pid == 0的数据（新闻，娱乐，体育）
-        $data = Category::where('cate_pid',0)->get();
+        // $data = Category::where('cate_pid',0)->get();
+        $data = (new Category)->tree();
         // dd($data);
         return view('admin.category.add',compact('data'));
     }
@@ -151,7 +153,8 @@ class CategoryController extends CommController
         //从数据库中找到你点击的那一条数据
         $field = Category::find($cate_id);
         //从数据库中找到cate_pid == 0的数据（新闻，娱乐，体育）
-        $data = Category::where('cate_pid',0)->get();
+        // $data = Category::where('cate_pid',0)->get();
+        $data = (new Category)->tree();
         return view('admin.category.edit',compact('field','data'));
     }
 
@@ -208,7 +211,6 @@ class CategoryController extends CommController
     //分类排序功能
     public function changeOrder()
     {
-        //
         // return 'aaaa';
         $input = Input::all();
         //到数据库中找到用户正在输入的那个框的序号id是第几个

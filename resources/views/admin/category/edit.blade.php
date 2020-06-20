@@ -48,9 +48,9 @@
                             <select name="cate_pid">
                                 <option value="0">==顶级分类==</option>
                                 @foreach($data as $v)
-                                <option value="{{$v->cate_id}}" 
-                                    @if($v->cate_id==$field->cate_pid) selected="selected" @endif>
-                                    {{$v->cate_name}}
+                                <option value="{{$v['cate_id']}}" 
+                                    @if($v['cate_id']==$field->cate_pid) selected="selected" @endif>
+                                    {{$v['seperator']}}{{$v['cate_name']}}
                                 </option>
                                 @endforeach
                             </select>

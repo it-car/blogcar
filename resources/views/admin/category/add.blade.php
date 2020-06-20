@@ -48,7 +48,7 @@
                             <select name="cate_pid">
                                 <option value="0">==顶级分类==</option>
                                 @foreach($data as $v)
-                                <option value="{{$v->cate_id}}">{{$v->cate_name}}</option>
+                                <option value="{{$v['cate_id']}}">{{$v['seperator']}}{{$v['cate_name']}}</option>
                                 @endforeach
                             </select>
                         </td>

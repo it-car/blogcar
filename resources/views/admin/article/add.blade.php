@@ -48,7 +48,7 @@
                         <td>
                             <select name="cate_id">
                                 @foreach($data as $v)
-                                <option value="{{$v->cate_id}}">{{$v->_cate_name}}</option>
+                                <option value="{{$v['cate_id']}}">{{$v['seperator']}}{{$v['cate_name']}}</option>
                                 @endforeach
                             </select>
                         </td>

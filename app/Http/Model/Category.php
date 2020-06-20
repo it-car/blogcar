@@ -20,7 +20,32 @@ class Category extends Model
    {
    		// $category = $this::all();
       $category = $this->orderBy('cate_order','asc')->get();
-      return $this->getTree($category,'cate_name','cate_id','cate_pid',0);
+      $class_tree = array();
+      $this->getTree($category,$class_tree,0,'|');
+      return $class_tree;
+   }
+
+   public function getTree($data,&$class_tree,$pid,$seperator)
+   {
+     $seperator .= '-';
+     foreach ($data as $value) {
+       if ($value->cate_pid == $pid) {
+         $new_code = array(
+            "cate_id" => $value->cate_id,
+            "cate_pid" => $value->cate_pid,
+            "cate_order" => $value->cate_order,
+            "cate_name" => $value->cate_name,
+            "cate_title" => $value->cate_title,
+            "cate_view" => $value->cate_view,
+            "cate_description" => $value->cate_description,
+            "cate_keywords" => $value->cate_keywords,
+            "seperator" => $seperator
+         );
+         array_push($class_tree, $new_code);
+         $this->getTree($data,$class_tree,$value->cate_id,$seperator);
+       }
+     }
+     return;
    }
 
    //static关键字静态的，不可用this指向，用(new Category)
@@ -31,7 +56,7 @@ class Category extends Model
    // }
    
    //分类树功能  可用递归实现  这里是用了嵌套循环
-   public function getTree($data,$field_name,$field_id='id',$field_pid='pid',$pid=0)
+   /*public function getTree($data,$field_name,$field_id='id',$field_pid='pid',$pid=0)
     {
         $arr = array();
         foreach ($data as $k => $v) {
@@ -50,6 +75,10 @@ class Category extends Model
             }
         }
         return $arr;
-    }
+    }*/
+
+
+
+
 
 }

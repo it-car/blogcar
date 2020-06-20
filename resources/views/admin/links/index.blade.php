@@ -40,6 +40,7 @@
                 <div class="short_wrap">
                     <a href="{{url('admin/links/create')}}"><i class="fa fa-plus"></i>添加链接</a>
                     <a href="{{url('admin/links')}}"><i class="fa fa-recycle"></i>全部链接</a>
+                    <a href="{{url('admin/links')}}"><i class="fa fa-refresh"></i>更新排序</a>
                 </div>
             </div>
             <!--快捷导航 结束-->
