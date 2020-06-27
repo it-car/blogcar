@@ -9,6 +9,7 @@
     <div class="crumb_warp">
         <!--<i class="fa fa-bell"></i> 欢迎使用登陆网站后台，建站的首选工具。-->
         <i class="fa fa-home"></i> <a href="{{url('admin/info')}}">首页</a> &raquo; <a href="{{url('admin/category')}}">分类管理</a> &raquo;编辑分类
+    </div>
     <!--面包屑导航 结束-->
 
 	<!--结果集标题与导航组件 开始-->
@@ -83,7 +84,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>排序：</th>
+                        <th><i class="require">*</i>排序：</th>
                         <td>
                             <input type="text" class="sm" name="cate_order" value="{{$field->cate_order}}">
                         </td>

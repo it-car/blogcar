@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Model\Category;
 use Input;
 use Validator;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class CategoryController extends CommController
 {
@@ -17,7 +19,8 @@ class CategoryController extends CommController
      *get.admin/category
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    // 1.添加一个Request类型参数，接收分页跳转时传递的当前分页值
+    public function index(Request $request)
     {
         //$category = Category::all();
         //字段都写死了，不可复用
@@ -26,11 +29,30 @@ class CategoryController extends CommController
         //$data = $this->getTree($category,'cate_name','cate_id','cate_pid',0);
         // return view('admin.category.index')->with('data',$data);
 
-
         // $category = Category::tree();
+
+        // 2.获取当前分页码
+        // $curr_page为当前显示页码数
+        if ($request->has('page')) {
+            $curr_page = $request->input('page');
+            $curr_page = $curr_page <=0 ? 1 : $curr_page;
+        } else {
+            $curr_page = 1;
+        }
+        // 3.设置每页显示的分类数$perPage和偏移量$offset
+        $perPage = 8;
+        $offset = ($curr_page - 1) * $perPage;//偏移量
+        // 4.将保存在数组$class_tree中的所有分类分割，并统计分类数
         $category = (new Category)->tree();
         // dd($category);
-        return view('admin.category.index')->with('data',$category);
+        $item = array_slice($category, $offset, $perPage);// 分割数组
+        $total = count($category);//统计总记录数
+        // dd($total);
+        $data = new LengthAwarePaginator($item,$total,$perPage,$curr_page,[
+                'path' => Paginator::resolveCurrentPath(),
+                'pageName' => 'page'
+        ]);
+        return view('admin.category.index')->with('data',$data);
     }
 
 
@@ -109,11 +131,14 @@ class CategoryController extends CommController
         // dd($input);
         $rules =[
             'cate_name' => 'required',
-            'cate_title' => 'required'
+            'cate_title' => 'required',
+            'cate_order' => 'required|numeric'
         ];
         $message = [
             'cate_name.required'=>'分类名称不能为空',
-            'cate_title.required'=>'分类标题不能为空'
+            'cate_title.required'=>'分类标题不能为空',
+            'cate_order.required'=>'分类排序不能为空',
+            'cate_order.numeric'=>'分类排序必须是数字'
         ];
         $validator = Validator::make($input, $rules,$message);
 
@@ -170,15 +195,42 @@ class CategoryController extends CommController
         //$cate_id提交表单传过来的那个数据edit.blade.php中
         //获取输入来的数据，'_token','_method'除外，因为这两个不需要写进数据库
         $input = Input::except('_token','_method');
-        //更新传进来（$cate_id）的那条数据
-        $res = Category::where('cate_id',$cate_id)->update($input);
-        // dd($res);
-        if ($res) {
-            return redirect('admin/category');
-        } else {
-            return back()->with('errors','更新数据失败，请稍后再试！');
+        // dd($input);
+        $class_set = (new Category())->class_set($cate_id);
+        // dd($class_set);
+        $flag = false;
+        foreach ($class_set as $value_id) {
+            if ($value_id == $input['cate_pid']) {
+                $flag = true;
+            }
         }
-        
+        if ($flag) {
+            return back()->with('errors','父级分类非法，请重新选择父级分类！');
+        } else {
+            $rules =[
+                'cate_name' => 'required',
+                'cate_title' => 'required',
+                'cate_order' => 'required|numeric'
+            ];
+            $message = [
+                'cate_name.required'=>'分类名称不能为空',
+                'cate_title.required'=>'分类标题不能为空',
+                'cate_order.required'=>'分类排序不能为空',
+                'cate_order.numeric'=>'分类排序必须是数字'
+            ];
+            $validator = Validator::make($input, $rules,$message);
+            if ($validator->passes()) {
+                //更新传进来（$cate_id）的那条数据
+                $res = Category::where('cate_id',$cate_id)->update($input);
+                if ($res) {
+                    return redirect('admin/category');
+                } else {
+                    return back()->with('errors','更新数据失败，请稍后再试！');
+                }
+            } else {
+                return back()->withErrors($validator);
+            }
+        }
     }
 
     /**
@@ -190,11 +242,25 @@ class CategoryController extends CommController
     public function destroy($cate_id)
     {
         //echo "2222";
-        $res = Category::where('cate_id',$cate_id)->delete();
-        //如果顶级分类被删除，则原来顶级分类中的子类提升为顶级分类
-        Category::where('cate_pid',$cate_id)->update(['cate_pid'=>0]);
+        //$res = Category::where('cate_id',$cate_id)->delete();
+        //方法一：如果顶级分类被删除，则原来顶级分类中的子类提升为顶级分类
+        //Category::where('cate_pid',$cate_id)->update(['cate_pid'=>0]);
+        
+        //方法二：如果顶级分类被删除，则原来顶级分类中的子类也删除
+        $cate_set = array($cate_id);
+        // dd($cate_set);
+        $all_class = Category::orderBy('cate_order','asc')->get(); //获取所有分类信息
+        (new Category())->get_class_set($cate_id,$all_class,$cate_set);
+        $flag = true;
+        //遍历删除分类及其子类
+        foreach ($cate_set as $cate) {
+            $result = Category::where('cate_id',$cate)->delete();
+            if (!$result) {
+                $flag = false;
+            }
+        }
         // dd($res);
-        if($res){
+        if($flag){
             $data = [
                 'status' => 0,
                 'msg' => '删除成功！'

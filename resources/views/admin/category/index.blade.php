@@ -76,34 +76,18 @@
                     </tr>
                     @endforeach
                 </table>
-                
-                <!-- <div class="page_nav">
-                    <div>
-                        <a class="first" href="/wysls/index.php/Admin/Tag/index/p/1.html">第一页</a> 
-                        <a class="prev" href="/wysls/index.php/Admin/Tag/index/p/7.html">上一页</a> 
-                        <a class="num" href="/wysls/index.php/Admin/Tag/index/p/6.html">6</a>
-                        <a class="num" href="/wysls/index.php/Admin/Tag/index/p/7.html">7</a>
-                        <span class="current">8</span>
-                        <a class="num" href="/wysls/index.php/Admin/Tag/index/p/9.html">9</a>
-                        <a class="num" href="/wysls/index.php/Admin/Tag/index/p/10.html">10</a> 
-                        <a class="next" href="/wysls/index.php/Admin/Tag/index/p/9.html">下一页</a> 
-                        <a class="end" href="/wysls/index.php/Admin/Tag/index/p/11.html">最后一页</a> 
-                        <span class="rows">11 条记录</span>
-                    </div>
-                </div>
-                
                 <div class="page_list">
-                    <ul>
-                        <li class="disabled"><a href="#">&laquo;</a></li>
-                        <li class="active"><a href="#">1</a></li>
-                        <li><a href="#">2</a></li>
-                        <li><a href="#">3</a></li>
-                        <li><a href="#">4</a></li>
-                        <li><a href="#">5</a></li>
-                        <li><a href="#">&raquo;</a></li>
-                    </ul>
-                </div> -->
-                
+                    {!! $data->appends(request()->input())->render() !!}
+                </div>
+                <style type="text/css">
+                    .result_content ul li span{
+                        padding: 6px 12px;
+                        text-decoration: none;
+                    }
+                    .page_list{
+                        text-align: center;
+                    }
+                </style>
             </div>
         </div>
     </form>
@@ -126,7 +110,7 @@
         //删除项
         function deleCate(cate_id){
             // alert('22');
-            layer.confirm('确认删除吗？', {
+            layer.confirm('你确认删除分类及其所有子类吗？', {
               btn: ['确认','手滑了'] //按钮
             }, function(){
               // alert(cate_id)
@@ -138,12 +122,8 @@
                 } else {
                     layer.msg(data.msg, {icon: 5});
                 }
-              });
-
-              // layer.msg('的确很重要', {icon: 1});    
-              }, function(){
-                
-                });
+              })
+          });
         }
     </script>
 

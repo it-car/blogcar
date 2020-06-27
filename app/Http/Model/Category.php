@@ -12,10 +12,31 @@ class Category extends Model
    protected $primaryKey = 'cate_id';
    //是否记录修改时间，如果没设置，在修改数据库中的数据时会出错，如修改密码，报错信息是让你添加一个‘create_at’字段
    public $timestamps = false;
-   
-   //哪些字段不允许修改
+   //哪些字段不允许修改 黑名单 (批量修改时用到)
    protected $guarded = [];
 
+   public function class_set($cate_id)
+   {
+     $all_class = Category::orderBy('cate_order','asc')->get();
+     $class_set = [$cate_id];
+     // 调用下面的递归方法
+     $this->get_class_set($cate_id,$all_class,$class_set);
+     // 把这个数组return出去
+     return $class_set;
+   }
+   // 递归拿到自己所在id的所有之类包括[自己-->($class_set = [$cate_id];)]，存在$class_set数组里面
+   public function get_class_set($cate_id,$all_class,&$class_set)
+   {
+     foreach ($all_class as $class) {
+       if ($class['cate_pid'] == $cate_id) {
+         array_push($class_set, $class['cate_id']);
+         $this->get_class_set($class['cate_id'],$all_class,$class_set);
+       }
+     }
+     return;
+   }
+
+   //调用分类树方法返回$class_tree数组
    public function tree()
    {
    		// $category = $this::all();
@@ -24,7 +45,7 @@ class Category extends Model
       $this->getTree($category,$class_tree,0,'|');
       return $class_tree;
    }
-
+   //递归实现分类树方法
    public function getTree($data,&$class_tree,$pid,$seperator)
    {
      $seperator .= '-';
